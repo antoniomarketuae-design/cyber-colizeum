@@ -130,7 +130,7 @@ function readJson(req, maxBytes = 16384) {
 }
 
 function isStaff(req) {
-  const m = /^Bearer (.{8,200})$/.exec(String(req.headers.authorization || ''));
+  const m = /^Bearer (.{4,200})$/.exec(String(req.headers.authorization || ''));
   return Boolean(m) && safeEqual(sha256(m[1].trim()), STAFF_KEY_SHA256);
 }
 

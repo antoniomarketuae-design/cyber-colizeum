@@ -1,7 +1,12 @@
 {
-  "version": 6,
+  "version": 7,
   "updated": "2026-11-14",
   "notes": [
+    {
+      "version": 7,
+      "date": "2026-11-14",
+      "text": "Staff key is now 0000, typed on the number keyboard."
+    },
     {
       "version": 6,
       "date": "2026-11-14",

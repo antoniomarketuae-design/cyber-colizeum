@@ -174,7 +174,7 @@ export default {
       const sheet = openSheet(`
         <h2 class="sheet-title">Staff mode</h2>
         <p class="muted">Enter your staff key. This phone remembers it until you log out.</p>
-        <input class="field key-input" data-key-input type="password" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" maxlength="40" aria-label="Staff key">
+        <input class="field key-input" data-key-input type="password" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" maxlength="40" aria-label="Staff key">
         <p class="err" data-key-err hidden></p>
         <div class="sheet-actions">
           <button type="button" class="btn" data-act="go">Open staff mode</button>
