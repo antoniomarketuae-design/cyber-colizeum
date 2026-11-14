@@ -79,6 +79,7 @@ export default {
         </section>
 
         <h2 class="section-title">The club</h2>
+        <img class="me-logo" src="img/logo.png" alt="Cyber Colizeum logo" width="850" height="823">
         <section class="card list">
           <a class="list-row" href="${CLUB.mapsUrl}" target="_blank" rel="noopener">${icons.pin}<span class="list-text"><b>${esc(CLUB.address)}</b><span>Open in Maps</span></span>${icons.chevronRight}</a>
           <a class="list-row" href="tel:${CLUB.tel}">${icons.phone}<span class="list-text"><b>${esc(CLUB.phone)}</b><span>Call the club</span></span>${icons.chevronRight}</a>

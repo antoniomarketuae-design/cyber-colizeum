@@ -28,7 +28,7 @@ What other clubs' apps do: `docs/01_RESEARCH_OTHER_CLUBS.md`.
 | Booking | ✅ v2 | `screens/book.js`, `data/bookings.js` | Room, day, time, hours, players, seats side by side; price estimate; request → staff confirms → message. |
 | Me (details, notification choices, club contacts) | ✅ v2 | `screens/me.js` | Bulgarian "coming soon". |
 | Staff mode | ✅ v2 demo | `screens/staff.js`, `screens/deal-edit.js` | Demo PIN 0000. How full, deals (on/off, edit, send now), booking requests, set any PC, demo "how full" control, reset. Same phone only until the server exists. |
-| Publishing (GitHub Pages) | ⏳ needs a repo | `tools/bump.js`, `tools/publish.js` | No repo yet (and no `gh` CLI on the PC). Ask the owner which GitHub account; then bump → publish. |
+| Publishing (GitHub Pages) | ✅ live 2026-11-14 (v2) | `tools/bump.js`, `tools/publish.js` | **https://antoniomarketuae-design.github.io/cyber-colizeum/** · repo `antoniomarketuae-design/cyber-colizeum` (public, created by the owner). `main` = app, docs, server, tools; `gh-pages` = `app/`. Same signed-in Git Credential Manager as Dreaming. Verified: files 200, service worker active, no console errors. |
 | Local preview | ✅ | `tools/serve.js`, `.claude/launch.json` | Browser pane: preview "app" (port 8787, or the next free one). |
 | App icons | ⏳ placeholder | `app/icons/`, `tools/make-icons.js` | Glowing 3×3 seat grid. Swap for the club's helmet logo when the owner sends the file. |
 | Server (accounts, deals for everyone, push, staff login) | 💭 next big step | `reference/dreaming-server/` → `server/` | Needs: VPS folder, port, database, nginx path. Makes staff deals reach every phone + real push. |

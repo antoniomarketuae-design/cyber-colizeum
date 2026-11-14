@@ -29,6 +29,8 @@ const SHELL = [
   'js/screens/me.js',
   'js/screens/staff.js',
   'js/screens/deal-edit.js',
+  'img/logo.png',
+  'img/wordmark.png',
   'icons/icon-180.png',
   'icons/icon-192.png',
   'icons/icon-512.png',

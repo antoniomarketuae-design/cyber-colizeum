@@ -116,8 +116,8 @@ export function chipsHTML(items, selected, act) {
   return items.map((it) => `<button type="button" class="chip" data-act="${act}" data-value="${esc(it.value)}" aria-pressed="${sel.has(it.value)}">${esc(it.label)}</button>`).join('');
 }
 
-/** The club's name as a glowing wordmark, for the top of a screen. */
-export const brandHTML = () => '<span class="brand">Cyber <b>Colizeum</b></span>';
+/** The club's "CYBER COLIZEUM" wordmark from its website, for the top of a screen. */
+export const brandHTML = () => '<img class="brand" src="img/wordmark.png" alt="Cyber Colizeum" width="815" height="73">';
 
 /** A "12:31" countdown to `end` (ms) that ticks by itself every second. */
 export const countdownHTML = (end) => `<span data-countdown="${end}">${countdown(end - Date.now())}</span>`;
