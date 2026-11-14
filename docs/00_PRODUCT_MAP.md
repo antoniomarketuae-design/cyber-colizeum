@@ -6,8 +6,9 @@ Owner: Admin (builds from his iPhone). Assistant: C++.
 ## Vision
 A phone app (home-screen PWA, like Dreaming) for the players of **Cyber Colizeum**, a gaming club in Sofia
 (https://cybercolizeum.bg). Described by the owner on 2026-11-14:
-- **Home = live map of which PCs are free.** 5 rooms, 48 PCs: VIP 5 · Streamer 1 · Bootcamp 9 · Bootcamp 2 3 ·
-  Main hall 30 (owner's numbers, 2026-11-14). PCs only — no PlayStation / SimRacing in the app.
+- **Home = live map of which PCs are free.** 5 rooms, 38 PCs: VIP 5 · Streamer 1 · Bootcamp 9 · Bootcamp 2 3 ·
+  Main hall 20 (owner's floor plan "ДП Компьютерный клуб", 2026-11-14; he first said hall 30). PCs only — no
+  PlayStation / SimRacing booking in the app (the sim seats are drawn on the map, greyed).
 - **Off-peak discounts by notification:** when PCs sit empty, players get a deal to come in. **The admin makes the
   deals however he wants** (any rooms, % off / price per hour / bonus time, right now / set times / when quiet).
 - **Booking in the app:** yes (the club confirms).
@@ -21,8 +22,8 @@ What other clubs' apps do: `docs/01_RESEARCH_OTHER_CLUBS.md`.
 | Component | Status | Where | Notes |
 |---|---|---|---|
 | App shell (tabs, install guide, updates, offline) | ✅ v2 | `app/js/app.js`, `sw.js` | Tabs Live · Deals · Book · Me; Staff + deal editor are link screens. New-message banner at the top. |
-| Club data (rooms, PC numbers, prices, contacts) | ✅ v2 | `app/js/data/club.js` | **PC numbering is a placeholder**: VIP 1–5, Streamer 6, Bootcamp 7–15, Bootcamp 2 16–18, Hall 19–48. Prices from the website. |
-| Live PC map (home) | ✅ v2 demo | `screens/live.js`, `data/live.js` | Simulated club (busier evenings). Tiles: free / playing "free from 15:40" / booked / yours / out of order. Tap → hold 15 min, "tell me when free", book later. |
+| Club data (rooms, PC numbers, prices, contacts, floor plan) | ✅ v8 | `app/js/data/club.js` | **PC numbering is a placeholder** (fits the monitor numbers in the photos): VIP 1–5, Streamer 6, Bootcamp 7–15, Bootcamp 2 16–18, Hall 19–38. `FLOOR` = map layout. Prices from the website. |
+| Live PC map (home) | ✅ v8 demo | `screens/live.js`, `screens/map.js`, `data/live.js` | Two views, remembered: **Rooms** (card per room, filters) and **Map** (neon floor plan of the whole club from the owner's drawing: slanted top wall, VIP, reception, streamer, Bootcamp by the entrance, Bootcamp 2 + sim seats, hall islands with violet LED walls; live tiles, room prices). Tap → hold / tell me / book. Simulated club. |
 | Deals + codes | ✅ v5 server | `screens/deals.js`, `data/deals.js` | Deals live on the server (same on every phone, cached for offline). Running now (code valid 1–5 h), coming up, your codes, price list. Codes are still made on the phone. |
 | Phone notifications (Web Push) | ✅ v5 live | `push.js`, `sw.js`, `data/inbox.js`, server | Me → Turn on notifications (iPhone: Home Screen app only). Server sends on staff Send / right-now deal saved / set-times deal start, within each player's rooms, quiet hours, max per day (auto only). Every message also lands in the bell inbox. Quiet-time deals: in-app only until real PC data. |
 | Booking | ✅ v2 | `screens/book.js`, `data/bookings.js` | Room, day, time, hours, players, seats side by side; price estimate; request → staff confirms → message. |

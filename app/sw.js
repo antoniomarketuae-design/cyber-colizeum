@@ -31,6 +31,7 @@ const SHELL = [
   'js/screens/me.js',
   'js/screens/staff.js',
   'js/screens/deal-edit.js',
+  'js/screens/map.js',
   'img/logo.png',
   'img/wordmark.png',
   'icons/logo-180.png',

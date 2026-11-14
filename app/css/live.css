@@ -174,3 +174,59 @@
 .ib-empty { margin: 10px 0 6px; }
 
 @media (prefers-reduced-motion: reduce) { .lv-pulse { animation: none; } }
+
+/* ---- Rooms | Map switch and the Map view (screens/map.js) ---- */
+
+.lv-view { margin: 4px 0 12px; }
+.lv-filters[hidden] { display: none; }
+.lv-offmap { margin-top: 18px; }
+
+.lv-map {
+  margin-bottom: 12px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(80% 50% at 50% 0%, rgba(79, 224, 238, 0.08), transparent 70%),
+    radial-gradient(70% 40% at 0% 100%, rgba(122, 92, 255, 0.1), transparent 70%),
+    #06080b;
+}
+.lv-map svg { display: block; width: 100%; height: auto; font-family: inherit; }
+.mp-grid { fill: none; stroke: rgba(220, 255, 255, 0.05); stroke-width: 1; }
+.mp-hatch { fill: #161b22; }
+.mp-wall { fill: none; stroke: rgba(220, 255, 255, 0.75); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.mp-divider { fill: none; stroke: #8b6bff; stroke-width: 3; stroke-linecap: round; }
+.mp-prop { fill: rgba(220, 255, 255, 0.04); stroke: rgba(220, 255, 255, 0.22); stroke-width: 1.2; }
+.mp-mark { fill: none; stroke: var(--cyan); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.mp-sim rect, .mp-sim path, .mp-sim line { fill: none; stroke: rgba(220, 255, 255, 0.2); stroke-width: 1.3; stroke-linecap: round; }
+
+.mp-label { fill: var(--ice); font-size: 10px; font-weight: 800; letter-spacing: 0.14em; }
+.mp-label.is-muted { fill: rgba(220, 255, 255, 0.34); font-size: 8.5px; font-weight: 700; }
+.mp-count { fill: var(--text-faint); font-size: 8.5px; font-weight: 600; }
+.mp-count.has-free { fill: var(--cyan); }
+.mp-count.has-deal { fill: var(--hot); }
+
+.mp-seat { cursor: pointer; outline: none; }
+.mp-desk { stroke-width: 1.3; }
+.mp-chair { fill: none; stroke: rgba(220, 255, 255, 0.22); stroke-width: 1.3; }
+.mp-n { font-size: 14px; font-weight: 800; text-anchor: middle; font-variant-numeric: tabular-nums; }
+.mp-t { font-size: 8.5px; font-weight: 600; text-anchor: middle; font-variant-numeric: tabular-nums; }
+.mp-seat.is-free .mp-desk { fill: rgba(79, 224, 238, 0.16); stroke: var(--cyan); }
+.mp-seat.is-free .mp-n { fill: var(--ice); }
+.mp-seat.is-free .mp-t { fill: var(--cyan); }
+.mp-seat.is-free .mp-chair { stroke: rgba(79, 224, 238, 0.7); }
+.mp-seat.is-busy .mp-desk { fill: #10141a; stroke: #2a313a; }
+.mp-seat.is-busy .mp-n, .mp-seat.is-busy .mp-t, .mp-seat.is-off .mp-n, .mp-seat.is-off .mp-t { fill: rgba(220, 255, 255, 0.42); }
+.mp-seat.is-reserved .mp-desk { fill: rgba(255, 133, 98, 0.12); stroke: var(--hot); }
+.mp-seat.is-reserved .mp-n, .mp-seat.is-reserved .mp-t { fill: #ffc4b2; }
+.mp-seat.is-off .mp-desk { fill: url(#mp-hatch); stroke: #2a313a; }
+.mp-seat.is-mine .mp-desk, .mp-seat.is-held .mp-desk { fill: var(--ice); stroke: var(--ice); }
+.mp-seat.is-mine .mp-n, .mp-seat.is-mine .mp-t, .mp-seat.is-held .mp-n, .mp-seat.is-held .mp-t { fill: #031417; }
+.mp-seat.is-mine .mp-chair, .mp-seat.is-held .mp-chair { stroke: var(--ice); }
+.mp-watch { fill: var(--wait); }
+.mp-seat:focus-visible .mp-desk { stroke: #fff; stroke-width: 2.5; }
+.mp-seat:active .mp-desk { opacity: 0.75; }
+
+.lv-map-note { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 6px 2px; color: var(--text-dim); font-size: 13px; }
+.lv-map-note b { color: var(--text); font-weight: 600; }
+.lv-map-note b.hot { color: var(--hot); }

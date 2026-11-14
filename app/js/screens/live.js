@@ -1,14 +1,16 @@
-// Live tab (home): which PCs are free right now, room by room, with the deals running now.
+// Live tab (home): which PCs are free right now, with the deals running now. Two views: Rooms (a card per room)
+// and Map (the club's floor plan, screens/map.js); the choice is remembered.
 // Tap a PC → its sheet: hold it for 15 min, "tell me when it's free", or book it for later.
 import { esc, icons, openSheet, closeSheet, chipsHTML, brandHTML, countdownHTML, patch } from '../ui.js';
 import { on, getSetting, setSetting } from '../store.js';
-import { ROOMS, roomById, TOTAL_PCS } from '../data/club.js';
+import { ROOMS, roomById, TOTAL_PCS, ON_MAP } from '../data/club.js';
 import { getLive, stats, watches, isWatched, toggleWatch } from '../data/live.js';
 import { activeHold, holdPc, updateBooking, HOLD_MINUTES } from '../data/bookings.js';
 import { runningDeals, roomPrice, offerShort, claimFor, roomsText } from '../data/deals.js';
 import { messages, unreadCount, markAllRead } from '../data/inbox.js';
 import { hm, duration, euro, ago } from '../time.js';
 import { openDealSheet } from './deals.js';
+import { mapHTML } from './map.js';
 
 let offs = [];
 
@@ -176,6 +178,7 @@ export default {
         <div data-hero></div>
         <div data-hold></div>
         <div data-deals></div>
+        <div class="seg lv-view" role="group" aria-label="View" data-view></div>
         <nav class="lv-filters" aria-label="Rooms" data-filters></nav>
         <div data-rooms></div>
         <div class="lv-legend" aria-hidden="true">
@@ -224,25 +227,35 @@ export default {
           </button>`;
       }).join(''));
 
+      const view = getSetting('live.view', 'rooms');
+      patch(part('view'), ['rooms', 'map'].map((v) => `<button type="button" data-act="view" data-value="${v}" aria-pressed="${v === view}">${v === 'map' ? 'Map' : 'Rooms'}</button>`).join(''));
+      part('filters').hidden = view === 'map';
       patch(part('filters'), chipsHTML(
         [{ value: 'all', label: 'All rooms' }, ...ROOMS.map((r) => ({ value: r.id, label: `${r.short} · ${st.rooms[r.id].free}` }))],
         filter, 'filter'));
 
-      // One box per room shown, each repainted on its own.
-      const shown = ROOMS.filter((r) => filter === 'all' || r.id === filter);
+      // Map: the floor plan, then the PCs not on it yet as room boxes. Rooms: one box per room (filtered).
+      // Each box is repainted on its own.
+      const boxes = view === 'map'
+        ? ROOMS.map((room) => ({ room, pcs: live.filter((p) => p.room === room.id && !ON_MAP.has(p.n)) })).filter((b) => b.pcs.length)
+        : ROOMS.filter((r) => filter === 'all' || r.id === filter).map((room) => ({ room, pcs: live.filter((p) => p.room === room.id) }));
       const roomsEl = part('rooms');
-      if (roomsEl.dataset.shown !== filter) {
-        roomsEl.dataset.shown = filter;
-        roomsEl.innerHTML = shown.map((r) => `<section class="lv-room" data-room="${r.id}"></section>`).join('');
+      const layout = `${view}:${view === 'map' ? '' : filter}:${boxes.map((b) => b.room.id).join(',')}`;
+      if (roomsEl.dataset.layout !== layout) {
+        roomsEl.dataset.layout = layout;
+        roomsEl.innerHTML = (view === 'map' ? '<div data-map></div><h2 class="section-title lv-offmap">Not on the map yet</h2>' : '')
+          + boxes.map((b) => `<section class="lv-room" data-room="${b.room.id}"></section>`).join('');
+        if (view === 'map' && !boxes.length) roomsEl.querySelector('.lv-offmap').remove();
       }
-      for (const room of shown) {
-        const pcs = live.filter((p) => p.room === room.id);
-        const free = st.rooms[room.id].free;
+      if (view === 'map') patch(roomsEl.querySelector('[data-map]'), mapHTML(live, running, watched));
+      for (const { room, pcs } of boxes) {
+        const free = pcs.filter((p) => p.status === 'free').length;
         const wide = room.count === 1;
+        const partial = pcs.length < room.count;
         patch(roomsEl.querySelector(`[data-room="${room.id}"]`), `
           <header class="lv-room-head">
-            <h2>${esc(room.name)}</h2>
-            <span class="lv-room-free${free ? ' has-free' : ''}">${free ? `${free} of ${room.count} free` : 'Full'}</span>
+            <h2>${esc(room.name)}${partial ? ` <span class="faint">· PC ${pcs[0].n}–${pcs[pcs.length - 1].n}</span>` : ''}</h2>
+            <span class="lv-room-free${free ? ' has-free' : ''}">${free ? `${free} of ${pcs.length} free` : 'Full'}</span>
           </header>
           <p class="lv-room-meta">${priceHTML(roomPrice(room, running))}</p>
           <div class="lv-grid${wide ? ' is-wide' : ''}">${pcs.map((pc) => tileHTML(pc, { wide, watched: watched.has(pc.n) })).join('')}</div>`);
@@ -257,6 +270,15 @@ export default {
       else if (act === 'deal') openDealSheet(t.dataset.id, ctx);
       else if (act === 'inbox') openInbox(ctx);
       else if (act === 'filter') { setSetting('live.filter', t.dataset.value); paint(); }
+      else if (act === 'view') { setSetting('live.view', t.dataset.value); paint(); }
+    });
+    // The map's PCs are drawn shapes, not buttons: Enter or Space opens them too.
+    root.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const seat = e.target.closest?.('.mp-seat');
+      if (!seat) return;
+      e.preventDefault();
+      openPcSheet(Number(seat.dataset.pc), ctx);
     });
 
     paint();
