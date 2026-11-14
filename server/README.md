@@ -20,8 +20,9 @@ starts (checked every 30 s, Sofia time). Quiet-time deals can't notify yet: the 
 - PM2 process **`colizeum-api`** on **127.0.0.1:3030** (`pm2 save` done).
 - nginx: `location /colizeum-api/` added after `/dreaming-api/` in `/etc/nginx/sites-enabled/nexflow`; backup in
   `/root/nginx-backups/nexflow.20261114-165438.before-colizeum`.
-- Staff key: plain text only on the dev PC at `C:\Users\Ljh\.colizeum\staff.key` (and with the owner); the server keeps
-  its sha256. New key = new hash in `.env` + `pm2 restart colizeum-api --update-env`.
+- Staff key: **0000** since 2026-11-14, the owner's choice after a warning that any player could guess it (Staff mode
+  is visible in Me). Also in `C:\Users\Ljh\.colizeum\staff.key`. The server keeps only its sha256. New key = new hash
+  in `.env` + `pm2 restart colizeum-api --update-env` (the key must be at least 4 characters).
 
 ## Deploy a change
 ```
