@@ -1,0 +1,30 @@
+/* Staff mode (.st-) and the deal editor (.de-) */
+
+.st-now { padding-bottom: 10px; }
+.st-big { margin: 0 0 12px; color: var(--text-dim); }
+.st-big b { font-size: 26px; font-weight: 800; color: var(--ice); }
+.st-bar { display: grid; grid-template-columns: 96px 1fr 40px; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13.5px; }
+.st-bar-name { color: var(--text-dim); }
+.st-bar-track { height: 8px; border-radius: 4px; background: rgba(220, 255, 255, 0.08); overflow: hidden; }
+.st-bar-track span { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--cyan), var(--violet)); }
+.st-bar-num { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.st-deal.is-dim { opacity: 0.6; }
+.st-deal-top { display: flex; align-items: center; gap: 10px; }
+.st-deal-title { flex: 1; min-width: 0; font-size: 16.5px; color: var(--ice); }
+.st-deal-when { margin: 8px 0; font-size: 13.5px; }
+.st-deal p { margin: 0; }
+.st-deal-actions { display: flex; gap: 8px; margin-top: 12px; }
+.st-deal-actions .btn { flex: 1; }
+
+.st-booking { display: flex; flex-direction: column; gap: 3px; }
+.st-booking b { color: var(--ice); }
+.st-tel { display: inline-flex; align-items: center; gap: 6px; color: var(--cyan); text-decoration: none; font-size: 14.5px; }
+.st-tel svg { width: 16px; height: 16px; }
+.st-empty { margin: 0 4px 12px; }
+.st-room .lv-room-head { margin-bottom: 10px; }
+
+.de-value { display: flex; align-items: center; gap: 10px; margin-top: 12px; color: var(--text-dim); }
+.de-value .field { width: 110px; flex: none; font-size: 20px; font-weight: 700; text-align: center; }
+.de-times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.de-actions { display: grid; gap: 10px; margin-top: 18px; }

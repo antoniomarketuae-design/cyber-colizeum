@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "updated": "2026-11-14",
+  "notes": [
+    {
+      "version": 2,
+      "date": "2026-11-14",
+      "text": "First real version: live map of all 48 PCs, deals with codes, booking, messages, and Staff mode to make deals and confirm bookings (demo data)."
+    },
+    {
+      "version": 1,
+      "date": "2026-11-14",
+      "text": "First version: the app shell (four tabs, install guide, updates, offline)."
+    }
+  ]
+}
