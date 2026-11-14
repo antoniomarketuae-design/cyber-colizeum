@@ -174,7 +174,7 @@ function maybeShowInstallGuide() {
   el.className = 'install';
   el.innerHTML = `
     <div class="install-inner">
-      <img class="install-icon" src="icons/icon-180.png" alt="" width="88" height="88">
+      <img class="install-icon" src="icons/logo-180.png" alt="" width="88" height="88">
       <h1>Install ${APP_NAME}</h1>
       <p class="install-lead">Put it on your Home Screen: it opens full screen like a real app, and it can tell you when there's a deal.</p>
       <ol class="steps">

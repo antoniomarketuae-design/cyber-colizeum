@@ -36,6 +36,6 @@ async function systemNotify(m) {
   try {
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
     const reg = await navigator.serviceWorker?.getRegistration();
-    await reg?.showNotification(m.title, { body: m.body, icon: 'icons/icon-192.png', tag: m.id, data: { link: m.link || '#live' } });
+    await reg?.showNotification(m.title, { body: m.body, icon: 'icons/logo-192.png', tag: m.id, data: { link: m.link || '#live' } });
   } catch {}
 }

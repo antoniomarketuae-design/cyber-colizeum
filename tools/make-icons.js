@@ -7,7 +7,8 @@ const zlib = require('zlib');
 
 const LOGO = path.join(__dirname, '..', 'app', 'img', 'logo.png');
 const OUT = path.join(__dirname, '..', 'app', 'icons');
-const SIZES = { 'icon-180.png': 180, 'icon-192.png': 192, 'icon-512.png': 512 };
+// New names whenever the picture changes: iPhone keeps a Home Screen icon by its file name.
+const SIZES = { 'logo-180.png': 180, 'logo-192.png': 192, 'logo-512.png': 512 };
 const LOGO_WIDTH = 0.78; // share of the icon; keeps the round logo inside Android's "maskable" safe circle
 
 const mix = (a, b, t) => a + (b - a) * t;

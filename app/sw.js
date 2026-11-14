@@ -31,9 +31,9 @@ const SHELL = [
   'js/screens/deal-edit.js',
   'img/logo.png',
   'img/wordmark.png',
-  'icons/icon-180.png',
-  'icons/icon-192.png',
-  'icons/icon-512.png',
+  'icons/logo-180.png',
+  'icons/logo-192.png',
+  'icons/logo-512.png',
 ];
 
 self.addEventListener('install', (event) => {
