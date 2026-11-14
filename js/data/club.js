@@ -81,7 +81,8 @@ export const ALL_PCS = ROOMS.flatMap(pcsOf);
 // Drawn from the club's design drawing ("ДП Компьютерный клуб", owner 2026-11-14) as a phone-sized map: same
 // arrangement (slanted top wall, VIP top left, reception, streamer room, Bootcamp by the entrance, Bootcamp 2 next to
 // the sim-racing seats, the main hall's two islands with screens back to back), but every PC drawn big enough to tap.
-// Units are the SVG's own (viewBox 0 0 340 896). The PlayStation rooms and the 2-PC room by the sim seats are left out.
+// Units are the SVG's own (viewBox 0 0 340 896). Owner (2026-11-14): the small room is the Streamer room; leave the
+// 2-PC room by the sim seats and the PlayStation rooms off the map.
 const SEAT_W = 38;
 const SEAT_H = 42;
 const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
