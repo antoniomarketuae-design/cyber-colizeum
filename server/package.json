@@ -1,0 +1,14 @@
+{
+  "name": "colizeum-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cyber Colizeum deals and phone notifications (runs on the VPS behind nginx at /colizeum-api/)",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "web-push": "^3.6.7"
+  }
+}

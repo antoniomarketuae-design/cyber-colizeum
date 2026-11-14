@@ -28,3 +28,9 @@
 .de-value .field { width: 110px; flex: none; font-size: 20px; font-weight: 700; text-align: center; }
 .de-times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .de-actions { display: grid; gap: 10px; margin-top: 18px; }
+
+.st-news .btn-hot { margin-top: 14px; }
+.st-reach { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; color: var(--text-dim); font-size: 14px; }
+.st-reach svg { flex: none; width: 18px; height: 18px; color: var(--hot); }
+.st-reach b { color: var(--ice); }
+.st > .btn-ghost[data-act="logout"] { margin-top: 18px; }

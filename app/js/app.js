@@ -8,8 +8,9 @@ import me from './screens/me.js';
 import staff from './screens/staff.js';
 import dealEdit from './screens/deal-edit.js';
 import { icons, esc, closeSheet } from './ui.js';
-import { setPresenter } from './data/inbox.js';
-import { startEngine } from './engine.js';
+import { setPresenter, deliver } from './data/inbox.js';
+import { startEngine, syncClub } from './engine.js';
+import { warmUp } from './push.js';
 
 const APP_NAME = 'Cyber Colizeum';
 const TABS = [live, deals, book, me];
@@ -154,8 +155,17 @@ async function checkForUpdate(reason) {
 let swRegistration = null;
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').then((reg) => { swRegistration = reg; }).catch(() => {});
-  // A tapped system notification asks the open app to show its screen.
-  navigator.serviceWorker.addEventListener('message', (e) => { if (e.data?.link) ctx.navigate(e.data.link); });
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    // A notification arrived while the app is open: the phone already showed it, so it only joins the inbox.
+    if (e.data?.type === 'push') {
+      const m = e.data.message || {};
+      if (m.id) deliver({ id: m.id, kind: m.kind || 'news', title: m.title, body: m.body, link: m.link, at: m.at }, { quiet: true });
+      syncClub();
+      return;
+    }
+    // A tapped notification asks the open app to show its screen.
+    if (e.data?.link) ctx.navigate(e.data.link);
+  });
 }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
@@ -194,5 +204,6 @@ function maybeShowInstallGuide() {
 
 render();
 startEngine();
+warmUp();
 checkForUpdate('boot');
 maybeShowInstallGuide();
