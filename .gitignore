@@ -1,0 +1,10 @@
+# Secrets and local data: never upload
+.env
+.env.*
+!.env.example
+node_modules/
+output/
+reference/**/node_modules/
+*.log
+reference/
+Pics/

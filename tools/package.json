@@ -1,0 +1,8 @@
+{
+  "name": "colizeum-tools",
+  "private": true,
+  "description": "Local helper scripts. Optional: `npm install sharp` here so gen-image/gen-video also write small WebP / crop first frames.",
+  "optionalDependencies": {
+    "sharp": "^0.33.5"
+  }
+}
