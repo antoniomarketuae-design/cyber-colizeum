@@ -1,7 +1,12 @@
 {
-  "version": 7,
+  "version": 8,
   "updated": "2026-11-14",
   "notes": [
+    {
+      "version": 8,
+      "date": "2026-11-14",
+      "text": "New: a Map view on Live. See the whole club drawn like the real floor plan, every PC in its place with live free or busy and the room prices. The main hall now has its real 20 PCs."
+    },
     {
       "version": 7,
       "date": "2026-11-14",
