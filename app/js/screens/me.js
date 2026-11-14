@@ -19,6 +19,12 @@ function timeOptions(selected) {
     .map((t) => `<option value="${t}"${t === selected ? ' selected' : ''}>${t}</option>`).join('');
 }
 
+/** Staff keys look like CC-XXXX-XXXX-XXXX: accept small letters, spaces and the iPhone's long dashes too. */
+function cleanKey(typed) {
+  const plain = typed.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return /^CC[A-Z0-9]{12}$/.test(plain) ? `CC-${plain.slice(2, 6)}-${plain.slice(6, 10)}-${plain.slice(10)}` : typed.trim();
+}
+
 const PUSH_TEXT = {
   'needs-install': '<p class="fine">On iPhone, notifications work in the app on your Home Screen: in Safari tap Share → Add to Home Screen, open the app from there, then turn them on here.</p>',
   unsupported: '<p class="fine">This browser can’t get notifications. Deals still appear behind the bell.</p>',
@@ -147,7 +153,7 @@ export default {
           const state = await enablePush();
           ctx.toast(state === 'on' ? 'Notifications are on' : 'Notifications stay off');
         } catch (err) {
-          ctx.toast(err.status === 0 ? err.message : 'Couldn’t turn on notifications. Try again.');
+          ctx.toast(err.status === 0 ? err.message : `Couldn’t reach the club’s server (${err.message}). Try again.`);
         }
         paintPush();
       } else if (act === 'push-off') {
@@ -168,7 +174,7 @@ export default {
       const sheet = openSheet(`
         <h2 class="sheet-title">Staff mode</h2>
         <p class="muted">Enter your staff key. This phone remembers it until you log out.</p>
-        <input class="field key-input" data-key-input type="password" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" aria-label="Staff key">
+        <input class="field key-input" data-key-input type="password" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" maxlength="40" aria-label="Staff key">
         <p class="err" data-key-err hidden></p>
         <div class="sheet-actions">
           <button type="button" class="btn" data-act="go">Open staff mode</button>
@@ -179,7 +185,7 @@ export default {
           if (act !== 'go' || t.disabled) return;
           const input = sheet.el.querySelector('[data-key-input]');
           const err = sheet.el.querySelector('[data-key-err]');
-          const key = input.value.trim();
+          const key = cleanKey(input.value);
           if (!key) { err.textContent = 'Enter the staff key'; err.hidden = false; return; }
           t.disabled = true;
           setStaffKey(key);
