@@ -6,4 +6,5 @@
 .me-phone { margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
 .me-phone .fine { margin-top: 0; }
 .me-version { margin: 0 0 12px; color: var(--text-dim); }
+.me-logo { width: 132px; height: auto; margin: 4px auto 16px; filter: drop-shadow(0 0 18px rgba(79, 224, 238, 0.35)); }
 .pin { font-size: 24px; letter-spacing: 0.4em; text-align: center; }

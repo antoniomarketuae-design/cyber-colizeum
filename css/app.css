@@ -109,16 +109,13 @@ body[data-tabbar="hidden"] .screen { padding-bottom: calc(env(safe-area-inset-bo
 .err { margin: 6px 2px 0; color: var(--no); font-size: 13px; }
 .err[hidden] { display: none; }
 
-/* The club's name as a glowing wordmark */
+/* The club's wordmark (img/wordmark.png from cybercolizeum.bg), glowing like the room's LEDs */
 .brand {
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: var(--ice);
-  text-shadow: 0 0 14px rgba(79, 224, 238, 0.55);
+  display: block;
+  width: min(210px, 58vw);
+  height: auto;
+  filter: drop-shadow(0 0 8px rgba(79, 224, 238, 0.55));
 }
-.brand b { font-weight: 800; color: var(--cyan); }
 
 /* ---- Surfaces ---- */
 
