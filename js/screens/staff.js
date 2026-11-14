@@ -3,9 +3,9 @@
 // phone), how full the club is, booking requests, every PC, demo controls.
 // Still demo (this phone only): the PCs, how full the club is, and bookings — until the club's software is linked.
 import { esc, icons, openSheet, closeSheet, patch, chipsHTML } from '../ui.js';
-import { on, clearAll } from '../store.js';
+import { on } from '../store.js';
 import { ROOMS, roomById, TOTAL_PCS } from '../data/club.js';
-import { getLive, stats, setPc, getLevel, setLevel, resetLive } from '../data/live.js';
+import { getLive, stats, setPc, getLevel, setLevel } from '../data/live.js';
 import { listBookings, updateBooking } from '../data/bookings.js';
 import { listDeals, getDeal, dealState, setDealOn, syncDeals, offerShort, whenText, roomsText } from '../data/deals.js';
 import { deliver } from '../data/inbox.js';
@@ -184,7 +184,7 @@ export default {
         <div class="seg">${LEVELS.map((l) => `<button type="button" data-act="level" data-value="${l.value ?? ''}" aria-pressed="${level === l.value}">${l.label}</button>`).join('')}</div>
         <p class="fine">Pick “Quiet” to watch the “Quiet hall bonus” start by itself (between its hours). Quiet-time deals
           show inside the app for now; they become notifications once the app knows the club's real PCs.</p>
-        <button type="button" class="btn btn-ghost" data-act="reset">${icons.refresh}<span>Reset the demo on this phone</span></button>`);
+        <button type="button" class="btn btn-ghost" data-act="reset">${icons.refresh}<span>Start the demo over</span></button>`);
     };
 
     /** Asks before a notification goes out to everyone, then sends it through the server. */
@@ -250,19 +250,27 @@ export default {
 
     function confirmReset() {
       openSheet(`
-        <h2 class="sheet-title">Reset the demo on this phone?</h2>
-        <p class="muted">Deletes the bookings, codes and messages on this phone and starts the demo club fresh. The deals
-          on the server stay as they are. You'll need to enter the staff key again.</p>
+        <h2 class="sheet-title">Start the demo over?</h2>
+        <p class="muted">Every phone clears its demo: PCs back to normal, and bookings, holds, codes and messages gone.
+          Phones that are closed do it the next time they open. Deals, players' details and notification choices stay.</p>
         <div class="sheet-actions">
-          <button type="button" class="btn btn-danger" data-act="yes">Reset</button>
+          <button type="button" class="btn btn-danger" data-act="yes">${icons.refresh}<span>Start over</span></button>
           <button type="button" class="btn btn-ghost" data-act="close">Keep everything</button>
         </div>`, {
-        label: 'Reset demo',
-        onAct(act) {
-          if (act !== 'yes') return;
-          clearAll();
-          resetLive();
-          location.reload();
+        label: 'Start the demo over',
+        async onAct(act, t) {
+          if (act !== 'yes' || t.disabled) return;
+          t.disabled = true;
+          try {
+            await api('/admin/reset-demo', { method: 'POST', staff: true });
+          } catch (err) {
+            t.disabled = false;
+            ctx.toast(err.message);
+            return;
+          }
+          closeSheet();
+          await syncClub();
+          ctx.toast('Demo started over');
         },
       });
     }

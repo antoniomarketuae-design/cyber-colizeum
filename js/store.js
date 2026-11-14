@@ -47,6 +47,10 @@ export function emit(topic, data) {
   for (const fn of topics.get(topic) ?? []) { try { fn(data); } catch (err) { console.error(err); } }
 }
 
+export function remove(key) {
+  try { localStorage.removeItem(key); } catch {}
+}
+
 /** Every key this app writes, for "Reset demo". */
 export function clearAll() {
   try {
