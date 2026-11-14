@@ -11,6 +11,10 @@ const isStandalone = () => navigator.standalone === true || matchMedia('(display
 
 const supported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 
+// The service worker, ready before any tap (see enablePush).
+let readyReg = null;
+if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then((reg) => { readyReg = reg; }).catch(() => {});
+
 /** 'needs-install' | 'unsupported' | 'denied' | 'off' | 'on' */
 export async function pushState() {
   if (!supported()) return isIOS && !isStandalone() ? 'needs-install' : 'unsupported';
@@ -49,15 +53,25 @@ const keyBytes = (b64url) => {
 };
 
 /**
- * Asks the phone for permission and registers with the club's server. Call it straight from a tap (iPhone only
- * shows the question in answer to one). Returns the new state; throws with a plain message when something fails.
+ * Turns notifications on: the phone asks the player, then registers with the club's server. Call it straight from
+ * a tap. Safari allows subscribing only during the tap itself, so subscribe() must be the very first thing that
+ * waits: it shows the permission question by itself. (v5 asked first and subscribed after, which iPhone refused.)
+ * Returns the new state; throws with a plain message when something fails.
  */
 export async function enablePush() {
-  const permission = await Notification.requestPermission();
-  if (permission !== 'granted') return permission === 'denied' ? 'denied' : 'off';
-  const reg = await navigator.serviceWorker.ready;
-  let sub = await reg.pushManager.getSubscription();
-  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(await vapidKey()) });
+  const key = load(VAPID_KEY, '');
+  if (!readyReg || !key) {
+    warmUp();
+    throw Object.assign(new Error('The app is still starting. Tap “Turn on notifications” again.'), { status: 0 });
+  }
+  let sub;
+  try {
+    sub = await readyReg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) });
+  } catch (err) {
+    if (Notification.permission === 'denied') return 'denied';
+    if (Notification.permission === 'default') return 'off'; // the player closed the question
+    throw Object.assign(new Error(`Couldn’t turn on notifications (${err.name || 'error'}). Try again.`), { status: 0 });
+  }
   await api('/push/subscribe', { method: 'POST', body: { subscription: sub.toJSON(), prefs: prefs() } });
   emit('push');
   return 'on';

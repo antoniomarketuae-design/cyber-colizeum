@@ -1,7 +1,12 @@
 {
-  "version": 5,
+  "version": 6,
   "updated": "2026-11-14",
   "notes": [
+    {
+      "version": 6,
+      "date": "2026-11-14",
+      "text": "Fixed: turning on notifications on iPhone now really registers your phone. The staff key box accepts small letters, spaces and long dashes."
+    },
     {
       "version": 5,
       "date": "2026-11-14",
