@@ -1,11 +1,14 @@
 // The heartbeat: every 5 seconds (while the app is open) the demo club moves on, finished holds and bookings
-// close, deals that just started are announced (within the player's own limits) and watched PCs that became
-// free are reported. Screens listen for 'tick' to repaint.
+// close, quiet-time deals that just started are announced (within the player's own limits) and watched PCs that
+// became free are reported. Every minute it fetches the club's deals and messages. Screens listen for 'tick'.
+// Right-now and set-times deals are announced by the club's server as real notifications; quiet-time deals need
+// the club's real PC data, so until then this phone announces them from the demo club, inside the app.
 import { emit, load, save, getSetting } from './store.js';
 import { step, getLive, stats, watches, unwatch } from './data/live.js';
 import { expireBookings } from './data/bookings.js';
-import { listDeals, dealState, offerShort } from './data/deals.js';
-import { deliver } from './data/inbox.js';
+import { listDeals, dealState, offerShort, syncDeals } from './data/deals.js';
+import { deliver, syncMessages } from './data/inbox.js';
+import { api } from './api.js';
 import { roomOfPc } from './data/club.js';
 import { toMin, dayKey, HOUR } from './time.js';
 
@@ -36,7 +39,7 @@ function announceDeals(now, st) {
   const today = dayKey(now);
   const rooms = notifySetting('rooms');
   let changed = false;
-  for (const deal of listDeals()) {
+  for (const deal of listDeals().filter((d) => d.when.mode === 'quiet')) {
     const state = dealState(deal, now, st);
     if (!state.running) continue;
     const key = runKey(deal, state);
@@ -53,18 +56,6 @@ function announceDeals(now, st) {
   for (const [k, at] of Object.entries(sent.runs)) if (now - at > 8 * 24 * HOUR) delete sent.runs[k];
   for (const d of Object.keys(sent.days)) if (d !== today) delete sent.days[d];
   save(SENT_KEY, sent);
-}
-
-/** Staff "Send now": goes to every player at once (in this demo, this phone), whatever their limits. */
-export function sendDealNow(deal, now = Date.now()) {
-  const st = stats(getLive(now));
-  const state = dealState(deal, now, st);
-  if (state.running) {
-    const sent = load(SENT_KEY, { runs: {}, days: {} });
-    sent.runs[runKey(deal, state)] = now;
-    save(SENT_KEY, sent);
-  }
-  deliver(dealMessage(deal));
 }
 
 function checkWatches(live) {
@@ -92,10 +83,29 @@ export function tick(now = Date.now()) {
   emit('tick', { now, live, stats: st });
 }
 
+/** Deals and the club's messages from the server (also called when a notification arrives). */
+export async function syncClub() {
+  await Promise.all([
+    syncDeals(),
+    syncMessages((since) => api(`/messages?since=${since}`).then((d) => d.messages)),
+  ]);
+}
+
 let timer = null;
 export function startEngine() {
   if (timer) return;
   tick();
-  timer = setInterval(() => { if (document.visibilityState === 'visible') tick(); }, TICK_MS);
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') tick(); });
+  syncClub();
+  let beats = 0;
+  timer = setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    tick();
+    beats += 1;
+    if (beats % 12 === 0) syncClub(); // every minute
+  }, TICK_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    tick();
+    syncClub();
+  });
 }

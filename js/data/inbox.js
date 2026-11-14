@@ -22,14 +22,34 @@ export function clearInbox() {
   emit('inbox');
 }
 
-/** { kind: 'deal' | 'free' | 'booking', title, body, link } */
-export function deliver(msg) {
+/** { kind: 'deal' | 'news' | 'free' | 'booking', title, body, link }; `quiet` = straight to the inbox, no banner. */
+export function deliver(msg, { quiet = false } = {}) {
   const m = { id: `m${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`, at: Date.now(), read: false, ...msg };
-  save(KEY, [m, ...messages()].slice(0, 60));
+  if (messages().some((x) => x.id === m.id)) return null; // already here (push and inbox sync can both bring it)
+  save(KEY, [m, ...messages()].sort((a, b) => b.at - a.at).slice(0, 60));
   emit('inbox');
+  if (quiet) return m;
   if (document.visibilityState === 'visible') presenter?.(m);
   else systemNotify(m);
   return m;
+}
+
+// ---- Messages the club sent to everyone (kept on the server; arrive even without notifications allowed) ----
+
+const SINCE_KEY = 'colizeum.inbox.since';
+
+/** Adds the club's messages sent since the last check. The first time, only the last 12 hours. */
+export async function syncMessages(fetchMessages) {
+  const since = load(SINCE_KEY, null) ?? Date.now() - 12 * 3600000;
+  try {
+    const list = await fetchMessages(since);
+    let newest = since;
+    for (const m of list.sort((a, b) => a.at - b.at)) {
+      deliver({ id: m.id, kind: m.kind, title: m.title, body: m.body, link: m.link, at: m.at }, { quiet: true });
+      newest = Math.max(newest, m.at);
+    }
+    save(SINCE_KEY, newest);
+  } catch {}
 }
 
 async function systemNotify(m) {

@@ -1,7 +1,12 @@
 {
-  "version": 4,
+  "version": 5,
   "updated": "2026-11-14",
   "notes": [
+    {
+      "version": 5,
+      "date": "2026-11-14",
+      "text": "Real phone notifications: turn them on in Me, and the club can send you deals even when the app is closed. Deals are now the same on every phone. Staff mode uses a staff key and can send a notification to all players."
+    },
     {
       "version": 4,
       "date": "2026-11-14",

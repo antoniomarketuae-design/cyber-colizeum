@@ -1,4 +1,5 @@
 // Deals the admin makes in staff mode, and the codes players get for them.
+// The list lives on the club's server (staff mode edits it there) and a copy is kept on the phone.
 // A deal = rooms + an offer (% off, a price per hour, or bonus time) + when it runs:
 //   'now'    right now, for a few hours
 //   'weekly' on chosen days between two times (may cross midnight, e.g. 22:00–02:00)
@@ -6,6 +7,7 @@
 import { load, save, emit } from '../store.js';
 import { roomById } from './club.js';
 import { MIN, toMin, atMinutes, hm } from '../time.js';
+import { api } from '../api.js';
 
 const KEY = 'colizeum.deals.v1';
 const CLAIMS_KEY = 'colizeum.claims.v1';
@@ -13,22 +15,23 @@ export const WEEK = [1, 2, 3, 4, 5, 6, 0]; // Monday first
 export const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const EVERY_DAY = [0, 1, 2, 3, 4, 5, 6];
 
-// Examples so the demo is not empty; the admin edits or deletes them.
+// Until the first answer from the club's server (or with no internet on the first start), the server's starting
+// examples are shown; after that the phone keeps the server's list here.
 const EXAMPLES = [
   {
-    id: 'd-happy', title: 'Weekday happy hour', on: true, codeMinutes: 120,
+    id: 'd-happy', title: 'Weekday happy hour', on: true, notify: true, codeMinutes: 120,
     message: 'Main hall and both Bootcamps are 30% off. Show your code at the desk.',
     rooms: ['hall', 'bootcamp', 'bootcamp2'], offer: { type: 'percent', value: 30 },
     when: { mode: 'weekly', days: [1, 2, 3, 4, 5], from: '10:00', to: '16:00' },
   },
   {
-    id: 'd-quiet', title: 'Quiet hall bonus', on: true, codeMinutes: 120,
+    id: 'd-quiet', title: 'Quiet hall bonus', on: true, notify: true, codeMinutes: 120,
     message: 'The hall is quiet right now. Pay for 2 hours, play 3.',
     rooms: ['hall'], offer: { type: 'bonus', value: 50 },
     when: { mode: 'quiet', days: EVERY_DAY, from: '09:00', to: '18:00', below: 35 },
   },
   {
-    id: 'd-vip', title: 'VIP afternoon', on: true, codeMinutes: 180,
+    id: 'd-vip', title: 'VIP afternoon', on: true, notify: true, codeMinutes: 180,
     message: 'The VIP room is 3.50 € an hour this afternoon.',
     rooms: ['vip'], offer: { type: 'price', value: 3.5 },
     when: { mode: 'weekly', days: [1, 2, 3, 4], from: '12:00', to: '17:00' },
@@ -36,34 +39,41 @@ const EXAMPLES = [
 ];
 
 function data() {
-  let d = load(KEY, null);
-  if (!d?.deals) {
-    d = { deals: EXAMPLES.map((x) => ({ ...x, createdAt: Date.now() })) };
-    save(KEY, d);
-  }
-  return d;
+  return load(KEY, null) ?? { deals: EXAMPLES };
 }
 const store = (deals) => { save(KEY, { deals }); emit('deals'); };
 
 export const listDeals = () => data().deals;
 export const getDeal = (id) => listDeals().find((d) => d.id === id) ?? null;
 
-export function saveDeal(deal) {
-  const deals = listDeals();
-  const saved = { ...deal, id: deal.id || `d${Date.now().toString(36)}`, createdAt: deal.createdAt || Date.now() };
-  const i = deals.findIndex((d) => d.id === saved.id);
-  if (i >= 0) deals[i] = saved;
-  else deals.unshift(saved);
+/** Fetches the club's deals; keeps the last good list when offline. */
+export async function syncDeals() {
+  try {
+    const { deals } = await api('/deals');
+    if (JSON.stringify(deals) !== JSON.stringify(load(KEY, null)?.deals)) store(deals);
+  } catch {}
+}
+
+// Staff only (the staff key is sent): every change goes to the server, so all phones get it.
+
+/** Creates or updates a deal; `notify` false = no notification. Returns the saved deal. */
+export async function saveDeal(deal) {
+  const isNew = !deal.id || !getDeal(deal.id);
+  const { deal: saved, deals } = await api(isNew ? '/admin/deals' : `/admin/deals/${deal.id}`, {
+    method: isNew ? 'POST' : 'PUT', body: { deal }, staff: true,
+  });
   store(deals);
   return saved;
 }
 
-export function deleteDeal(id) {
-  store(listDeals().filter((d) => d.id !== id));
+export async function deleteDeal(id) {
+  const { deals } = await api(`/admin/deals/${id}`, { method: 'DELETE', staff: true });
+  store(deals);
 }
 
-export function setDealOn(id, on) {
-  store(listDeals().map((d) => (d.id === id ? { ...d, on } : d)));
+export async function setDealOn(id, on) {
+  const { deals } = await api(`/admin/deals/${id}`, { method: 'PUT', body: { deal: { on } }, staff: true });
+  store(deals);
 }
 
 // ---- When does a deal run? ----

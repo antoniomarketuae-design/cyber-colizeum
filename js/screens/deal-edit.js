@@ -1,11 +1,11 @@
-// Deal editor (#deal/new, #deal/<id>), staff only: name, message, rooms, offer, when it runs, how long the code
-// works, and a preview of the message players get.
+// Deal editor (#deal/new, #deal/<id>), staff only: name, message, rooms, offer, when it runs, whether players get a
+// notification, how long the code works, and a preview of the message. Saved on the club's server for every phone.
 import { esc, icons, chipsHTML, openSheet, closeSheet } from '../ui.js';
 import { ROOMS, roomById } from '../data/club.js';
 import { getDeal, saveDeal, deleteDeal, WEEK, DAY_SHORT, offerShort, roomsBusyPct } from '../data/deals.js';
 import { getLive, stats } from '../data/live.js';
 import { staffUnlocked } from './staff.js';
-import { fromMin, euro, HOUR } from '../time.js';
+import { fromMin, euro } from '../time.js';
 
 const NOW_HOURS = [1, 2, 3, 4, 6];
 const CODE_HOURS = [1, 2, 3, 5];
@@ -23,7 +23,7 @@ const LIMITS = { percent: [1, 90], price: [0.5, 50], bonus: [5, 300] };
 
 function blank() {
   return {
-    title: '', message: '', rooms: ['hall'], on: true, codeMinutes: 120,
+    title: '', message: '', rooms: ['hall'], on: true, notify: true, codeMinutes: 120,
     offer: { type: 'percent', value: 20 },
     when: { mode: 'now', hours: 2, days: [1, 2, 3, 4, 5], from: '10:00', to: '16:00', below: 35 },
   };
@@ -84,6 +84,10 @@ export default {
           <p class="err" data-err="when" hidden></p>
         </section>
         <section class="card">
+          <label class="toggle-row"><span><b>Notify players</b><span data-part="notify-help"></span></span>
+            <input type="checkbox" class="switch" data-f="notify"${d.notify !== false ? ' checked' : ''}></label>
+        </section>
+        <section class="card">
           <h2 class="card-title">The code works for</h2>
           <div class="chips" data-part="code"></div>
         </section>
@@ -116,8 +120,15 @@ export default {
       part('offerHelp').textContent = help;
     };
 
+    const NOTIFY_HELP = {
+      now: 'Their phones get a notification as soon as you save.',
+      weekly: 'Their phones get a notification each time the deal starts.',
+      quiet: 'Shows inside the app when it starts. Phone notifications for quiet-time deals come once the app knows the club’s real PCs; until then use “Send now”.',
+    };
+
     const paintWhen = () => {
       const w = d.when;
+      part('notify-help').textContent = NOTIFY_HELP[w.mode];
       part('mode').innerHTML = segHTML(MODES, w.mode, 'mode');
       if (w.mode === 'now') {
         part('whenBody').innerHTML = `
@@ -186,7 +197,7 @@ export default {
       } else if (act === 'code') {
         d.codeMinutes = Number(v);
         paintCode();
-      } else if (act === 'save') save();
+      } else if (act === 'save') { if (!t.disabled) save(t); }
       else if (act === 'delete') confirmDelete();
     });
 
@@ -197,11 +208,12 @@ export default {
       else if (f === 'value') { d.offer.value = e.target.value; showErr('value', ''); paintOffer(); paintPreview(); }
       else if (f === 'from' || f === 'to') { d.when[f] = e.target.value; showErr('when', ''); }
       else if (f === 'below') { d.when.below = e.target.value; showErr('when', ''); }
+      else if (f === 'notify') d.notify = e.target.checked;
     };
     root.addEventListener('input', onField);
     root.addEventListener('change', onField);
 
-    function save() {
+    async function save(button) {
       let ok = true;
       const title = d.title.trim();
       const message = d.message.trim();
@@ -220,16 +232,23 @@ export default {
       }
       if (!ok) { root.querySelector('.err:not([hidden])')?.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
 
-      const now = Date.now();
+      // A right-now deal starts when the server saves it, by the server's clock.
       const when = w.mode === 'now'
-        ? { mode: 'now', hours: w.hours, startsAt: now, endsAt: now + w.hours * HOUR }
+        ? { mode: 'now', hours: w.hours }
         : { mode: w.mode, days: [...w.days].sort(), from: w.from, to: w.to, ...(w.mode === 'quiet' ? { below: Number(w.below) } : {}) };
-      saveDeal({
-        id: existing?.id, createdAt: existing?.createdAt, on: existing ? existing.on : true,
-        title, message, rooms: ROOMS.map((r) => r.id).filter((id) => d.rooms.includes(id)),
-        offer: { type: d.offer.type, value }, when, codeMinutes: d.codeMinutes,
-      });
-      ctx.toast(w.mode === 'now' ? 'Deal saved and running' : 'Deal saved');
+      button.disabled = true;
+      try {
+        await saveDeal({
+          id: existing?.id, on: existing ? existing.on : true, notify: d.notify !== false,
+          title, message, rooms: ROOMS.map((r) => r.id).filter((id) => d.rooms.includes(id)),
+          offer: { type: d.offer.type, value }, when, codeMinutes: d.codeMinutes,
+        });
+      } catch (err) {
+        button.disabled = false;
+        ctx.toast(err.message);
+        return;
+      }
+      ctx.toast(w.mode === 'now' ? (d.notify !== false ? 'Deal running, players notified' : 'Deal saved and running') : 'Deal saved');
       ctx.back('#staff');
     }
 
@@ -242,9 +261,16 @@ export default {
           <button type="button" class="btn btn-ghost" data-act="close">Keep it</button>
         </div>`, {
         label: 'Delete deal',
-        onAct(act) {
-          if (act !== 'yes') return;
-          deleteDeal(existing.id);
+        async onAct(act, t) {
+          if (act !== 'yes' || t.disabled) return;
+          t.disabled = true;
+          try {
+            await deleteDeal(existing.id);
+          } catch (err) {
+            t.disabled = false;
+            ctx.toast(err.message);
+            return;
+          }
           closeSheet();
           ctx.toast('Deal deleted');
           ctx.back('#staff');

@@ -14,6 +14,8 @@ const SHELL = [
   'css/me.css',
   'css/staff.css',
   'js/app.js',
+  'js/api.js',
+  'js/push.js',
   'js/engine.js',
   'js/store.js',
   'js/time.js',
@@ -69,6 +71,23 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(req, { ignoreSearch: true })
         .then((hit) => hit || (req.mode === 'navigate' ? caches.match('index.html') : Response.error())))
   );
+});
+
+// A notification from the club's server (server/server.js → Web Push): show it, and tell an open app so the
+// message also lands in its inbox. iPhone requires every push to show a notification.
+self.addEventListener('push', (event) => {
+  let m = {};
+  try { m = event.data ? event.data.json() : {}; } catch { m = { body: event.data ? event.data.text() : '' }; }
+  event.waitUntil((async () => {
+    await self.registration.showNotification(m.title || 'Cyber Colizeum', {
+      body: m.body || '',
+      icon: 'icons/logo-192.png',
+      tag: m.id || undefined,
+      data: { link: m.link || '#deals' },
+    });
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const win of wins) win.postMessage({ type: 'push', message: m });
+  })());
 });
 
 // Tapping a notification opens the app (or brings it forward) on the screen the message points to.
