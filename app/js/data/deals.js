@@ -46,12 +46,15 @@ const store = (deals) => { save(KEY, { deals }); emit('deals'); };
 export const listDeals = () => data().deals;
 export const getDeal = (id) => listDeals().find((d) => d.id === id) ?? null;
 
-/** Fetches the club's deals; keeps the last good list when offline. */
+/** Fetches the club's deals; keeps the last good list when offline. Returns the server's answer (or null). */
 export async function syncDeals() {
   try {
-    const { deals } = await api('/deals');
-    if (JSON.stringify(deals) !== JSON.stringify(load(KEY, null)?.deals)) store(deals);
-  } catch {}
+    const data = await api('/deals');
+    if (JSON.stringify(data.deals) !== JSON.stringify(load(KEY, null)?.deals)) store(data.deals);
+    return data;
+  } catch {
+    return null;
+  }
 }
 
 // Staff only (the staff key is sent): every change goes to the server, so all phones get it.

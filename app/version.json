@@ -1,7 +1,12 @@
 {
-  "version": 8,
+  "version": 9,
   "updated": "2026-11-14",
   "notes": [
+    {
+      "version": 9,
+      "date": "2026-11-14",
+      "text": "New in Staff mode: Start the demo over clears the demo PCs, bookings, holds, codes and messages on every phone. Your details and choices stay."
+    },
     {
       "version": 8,
       "date": "2026-11-14",

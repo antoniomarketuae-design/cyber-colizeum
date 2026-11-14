@@ -67,6 +67,7 @@ const db = {
   subs: loadFile('subs.json', { subs: [] }),
   sent: loadFile('sent.json', { runs: {} }),
   messages: loadFile('messages.json', { messages: [] }),
+  meta: loadFile('meta.json', { demoResetAt: 0 }), // demoResetAt: staff "Start the demo over" (phones clear their demo)
 };
 saveFile('deals.json', db.deals);
 
@@ -349,7 +350,7 @@ async function handle(req, res) {
 
   if (req.method === 'GET' && path === '/health') return send(res, req, 200, { ok: true, version: VERSION });
   if (req.method === 'GET' && path === '/config') return send(res, req, 200, { vapidPublicKey: VAPID_PUBLIC_KEY });
-  if (req.method === 'GET' && path === '/deals') return send(res, req, 200, { deals: db.deals.deals, now: Date.now() });
+  if (req.method === 'GET' && path === '/deals') return send(res, req, 200, { deals: db.deals.deals, now: Date.now(), demoResetAt: db.meta.demoResetAt });
   if (req.method === 'GET' && path === '/messages') {
     const since = Number(url.searchParams.get('since')) || 0;
     return send(res, req, 200, { messages: db.messages.messages.filter((m) => m.at > since).map(({ rooms, ...m }) => m) });
@@ -384,6 +385,11 @@ async function handle(req, res) {
   if (path.startsWith('/admin/')) {
     requireStaff(req);
     if (req.method === 'POST' && path === '/admin/check') return send(res, req, 200, { ok: true });
+    if (req.method === 'POST' && path === '/admin/reset-demo') {
+      db.meta.demoResetAt = Date.now();
+      saveFile('meta.json', db.meta);
+      return send(res, req, 200, { demoResetAt: db.meta.demoResetAt });
+    }
     if (req.method === 'GET' && path === '/admin/stats') {
       const byRoom = Object.fromEntries(ROOMS.map((r) => [r, db.subs.subs.filter((s) => s.prefs.deals && (!s.prefs.rooms || s.prefs.rooms.includes(r))).length]));
       return send(res, req, 200, { phones: db.subs.subs.length, wantDeals: db.subs.subs.filter((s) => s.prefs.deals).length, byRoom, messages: db.messages.messages.slice(0, 10) });

@@ -3,8 +3,8 @@
 // became free are reported. Every minute it fetches the club's deals and messages. Screens listen for 'tick'.
 // Right-now and set-times deals are announced by the club's server as real notifications; quiet-time deals need
 // the club's real PC data, so until then this phone announces them from the demo club, inside the app.
-import { emit, load, save, getSetting } from './store.js';
-import { step, getLive, stats, watches, unwatch } from './data/live.js';
+import { emit, load, save, remove, getSetting } from './store.js';
+import { step, getLive, stats, watches, unwatch, resetLive } from './data/live.js';
 import { expireBookings } from './data/bookings.js';
 import { listDeals, dealState, offerShort, syncDeals } from './data/deals.js';
 import { deliver, syncMessages } from './data/inbox.js';
@@ -83,12 +83,26 @@ export function tick(now = Date.now()) {
   emit('tick', { now, live, stats: st });
 }
 
+// Staff "Start the demo over" (server demoResetAt): every phone clears its demo PCs, bookings, holds, codes, watched
+// PCs and messages. The player's details, notification choices, view and the staff login stay.
+const RESET_KEY = 'colizeum.demoReset';
+const DEMO_KEYS = ['colizeum.live.v1', 'colizeum.bookings.v1', 'colizeum.claims.v1', 'colizeum.watch.v1', 'colizeum.inbox.v1', SENT_KEY];
+
+function applyDemoReset(at) {
+  if (!at || at <= load(RESET_KEY, 0)) return;
+  for (const key of DEMO_KEYS) remove(key);
+  save('colizeum.inbox.since', at);
+  save(RESET_KEY, at);
+  resetLive();
+  for (const topic of ['live', 'bookings', 'deals', 'inbox']) emit(topic);
+  tick();
+}
+
 /** Deals and the club's messages from the server (also called when a notification arrives). */
 export async function syncClub() {
-  await Promise.all([
-    syncDeals(),
-    syncMessages((since) => api(`/messages?since=${since}`).then((d) => d.messages)),
-  ]);
+  const club = await syncDeals();
+  applyDemoReset(club?.demoResetAt);
+  await syncMessages((since) => api(`/messages?since=${since}`).then((d) => d.messages));
 }
 
 let timer = null;
